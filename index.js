@@ -3,9 +3,14 @@ import ReactDOM from 'react-dom/server'
 import { match } from 'react-router'
 import Relay from 'react-relay'
 import IsomorphicRouter from 'isomorphic-relay-router'
+import { createStore } from 'redux'
+import { Provider, connect } from 'react-redux'
 import { runQuery } from './data/schema'
 
-const App = (props) => <div><h1>app</h1>{props.children}</div>
+const store = createStore((state = {}, action) => ({ name: 'App!' }), {})
+
+const Header = connect(state=>state)(props=><div>header {props.name}</div>) 
+const App = (props) => <div><Header />{props.children}</div>
 const Page1 = Relay.createContainer((props) => <div>page1! {props.promotion.title}</div>, {
   fragments: {
     promotion: () => Relay.QL` fragment on Promotion { title } `
@@ -48,7 +53,9 @@ match({ routes, location: '/page1/2?q=3' }, (error, redirectLocation, renderProp
   else {
     IsomorphicRouter.prepareData(renderProps, myNetworkLayer)
       .then(({ data, props }) => {
-        const rendered = ReactDOM.renderToStaticMarkup(IsomorphicRouter.render(props))
+        const rendered = ReactDOM.renderToStaticMarkup(
+          <Provider store={store}>{IsomorphicRouter.render(props)}</Provider>
+        )
         console.log('rendered=', rendered)
       })
       .catch((err) => { console.log('failed!, err=', err) })
