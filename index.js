@@ -9,14 +9,16 @@ import { runQuery } from './data/schema'
 
 const store = createStore((state = {}, action) => ({ name: 'App!' }), {})
 
-const Header = connect(state=>state)(props=><div>header {props.name}</div>) 
+const Header = connect(state => state)(props => <div>header {props.name}</div>)
 const App = (props) => <div><Header />{props.children}</div>
 const Page1 = Relay.createContainer((props) => <div>page1! {props.promotion.title}</div>, {
   fragments: {
     promotion: () => Relay.QL` fragment on Promotion { title } `
   }
 })
-const rootQuery = { promotion: (Component) => Relay.QL` query { promotion { ${Component.getFragment('promotion')} } }` }
+const rootQuery = { 
+  promotion: (Component) => Relay.QL` query { promotion { ${Component.getFragment('promotion')} } }` 
+}
 
 const routes = {
   path: '/',
@@ -30,7 +32,6 @@ const routes = {
 
 var myNetworkLayer = {
   sendQueries(queryRequests) {
-    // console.log('queryRequests=', queryRequests)
     return Promise.all(queryRequests.map(
       queryRequest => {
         runQuery().then(res => {
